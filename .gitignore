@@ -1,0 +1,13 @@
+venv/
+__pycache__/
+*.pyc
+
+evidence/
+logs/
+
+main_backup.py
+config_backup.py
+
+note_face_detection.txt
+notepad/
+notepad_face_detection.txt
