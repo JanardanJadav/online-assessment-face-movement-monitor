@@ -1,0 +1,1689 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta
+        name="viewport"
+        content="width=device-width, initial-scale=1.0"
+    >
+
+    <title>Face Movement Monitor</title>
+
+    <!-- MediaPipe Tasks Vision -->
+
+
+    <style>
+
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 30px;
+        }
+
+        video {
+            width: 640px;
+            max-width: 90%;
+            border: 2px solid #333;
+            border-radius: 8px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+
+        #status {
+            font-size: 18px;
+            font-weight: bold;
+        }
+
+        #faceCount {
+            font-size: 20px;
+        }
+
+/* --------------------------------------------------
+   EVIDENCE GALLERY
+-------------------------------------------------- */
+
+#evidenceContainer {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(300px, 1fr)
+        );
+
+    gap: 20px;
+
+    width: 90%;
+
+    max-width: 1200px;
+
+    margin: 20px auto;
+
+}
+
+
+/* --------------------------------------------------
+   EVIDENCE CARD
+-------------------------------------------------- */
+
+.evidence-card {
+
+    border: 1px solid #ccc;
+
+    border-radius: 10px;
+
+    padding: 15px;
+
+    background: #f8f8f8;
+
+    text-align: left;
+
+    box-shadow:
+        0 2px 8px rgba(0, 0, 0, 0.08);
+
+}
+
+
+/* --------------------------------------------------
+   EVIDENCE IMAGE
+-------------------------------------------------- */
+
+.evidence-card img {
+
+    width: 100%;
+
+    border-radius: 6px;
+
+    margin-top: 10px;
+
+}
+
+
+/* --------------------------------------------------
+   EVIDENCE INFORMATION
+-------------------------------------------------- */
+
+.evidence-title {
+
+    font-size: 18px;
+
+    font-weight: bold;
+
+    margin-bottom: 5px;
+
+}
+
+
+.evidence-event {
+
+    font-weight: bold;
+
+}
+
+
+.evidence-time {
+
+    font-size: 14px;
+
+    color: #666;
+
+}
+
+
+/* --------------------------------------------------
+   DOWNLOAD BUTTON
+-------------------------------------------------- */
+
+.evidence-download {
+
+    display: inline-block;
+
+    margin-top: 10px;
+
+    padding: 8px 12px;
+
+    background: #333;
+
+    color: white;
+
+    text-decoration: none;
+
+    border-radius: 5px;
+
+}
+
+.evidence-download:hover {
+
+    background: #555;
+
+}
+
+/* --------------------------------------------------
+   SESSION DASHBOARD
+-------------------------------------------------- */
+
+#dashboard {
+
+    width: 90%;
+
+    max-width: 1200px;
+
+    margin: 20px auto;
+
+    padding: 20px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 10px;
+
+    background: #f8f8f8;
+
+}
+
+
+/* --------------------------------------------------
+   EVENT SUMMARY
+-------------------------------------------------- */
+
+#eventSummary {
+
+    display: grid;
+
+    grid-template-columns:
+        repeat(
+            auto-fit,
+            minmax(140px, 1fr)
+        );
+
+    gap: 12px;
+
+    margin: 20px 0;
+
+}
+
+
+/* --------------------------------------------------
+   SUMMARY CARD
+-------------------------------------------------- */
+
+.summary-card {
+
+    padding: 15px;
+
+    border: 1px solid #ddd;
+
+    border-radius: 8px;
+
+    background: white;
+
+    text-align: center;
+
+}
+
+
+.summary-card span {
+
+    display: block;
+
+    font-size: 13px;
+
+}
+
+
+.summary-card strong {
+
+    display: block;
+
+    margin-top: 5px;
+
+    font-size: 25px;
+
+}
+
+/* --------------------------------------------------
+   EVENT LOG
+-------------------------------------------------- */
+
+#eventLogContainer {
+
+    width: 90%;
+
+    max-width: 1200px;
+
+    margin: 20px auto;
+
+    overflow-x: auto;
+
+}
+
+
+#eventTable {
+
+    width: 100%;
+
+    border-collapse: collapse;
+
+    background: white;
+
+}
+
+
+#eventTable th,
+#eventTable td {
+
+    border: 1px solid #ddd;
+
+    padding: 10px;
+
+    text-align: center;
+
+}
+
+
+#eventTable th {
+
+    background: #f0f0f0;
+
+    font-weight: bold;
+
+}
+
+
+#eventTable tr:nth-child(even) {
+
+    background: #fafafa;
+
+}
+
+
+#exportLog {
+
+    padding: 10px 18px;
+
+    margin-bottom: 15px;
+
+    cursor: pointer;
+
+}
+
+/* --------------------------------------------------
+   APPLICATION HEADER
+-------------------------------------------------- */
+
+.app-header {
+
+    width: 90%;
+
+    max-width: 1200px;
+
+    margin: 0 auto 25px auto;
+
+    padding: 25px;
+
+    border-radius: 12px;
+
+    background: #f5f5f5;
+
+    border: 1px solid #ddd;
+
+}
+
+
+.app-header h1 {
+
+    margin: 0;
+
+    font-size: 32px;
+
+}
+
+
+.app-header h1 span {
+
+    display: block;
+
+}
+
+
+.app-subtitle {
+
+    margin-top: 8px;
+
+    font-size: 16px;
+
+    color: #666;
+
+}
+
+/* --------------------------------------------------
+   MONITORING STATUS
+-------------------------------------------------- */
+
+#monitorStatus {
+
+    display: inline-block;
+
+    margin-left: 6px;
+
+    padding: 6px 12px;
+
+    border-radius: 20px;
+
+    font-weight: bold;
+
+    font-size: 14px;
+
+}
+
+
+/* --------------------------------------------------
+   CONTROL BUTTONS
+-------------------------------------------------- */
+
+#startCamera,
+#calibrate,
+#stopMonitoring {
+
+    margin: 8px 5px;
+
+    min-width: 150px;
+
+    border: 1px solid #ccc;
+
+    border-radius: 6px;
+
+    background: white;
+
+    transition: opacity 0.2s ease;
+
+}
+
+
+#startCamera:not(:disabled):hover,
+#calibrate:not(:disabled):hover,
+#stopMonitoring:not(:disabled):hover {
+
+    opacity: 0.75;
+
+}
+
+
+button:disabled {
+
+    cursor: not-allowed;
+
+    opacity: 0.45;
+
+}
+
+/* --------------------------------------------------
+   STATUS STATES
+-------------------------------------------------- */
+
+.status-not-started {
+
+    background: #eee;
+
+    color: #555;
+
+}
+
+
+.status-camera {
+
+    background: #e8f0ff;
+
+    color: #2457a6;
+
+}
+
+
+.status-monitoring {
+
+    background: #e8f7ed;
+
+    color: #237a45;
+
+}
+
+
+.status-stopped {
+
+    background: #f2f2f2;
+
+    color: #666;
+
+}
+
+    </style>
+
+</head>
+
+<body>
+
+    <header class="app-header">
+
+    <h1>
+        Online Assessment
+        <span>Face Movement Monitor</span>
+    </h1>
+
+    <p class="app-subtitle">
+        Real-time facial movement monitoring
+        for online assessments
+    </p>
+
+</header>
+
+<div id="dashboard">
+
+    <h2>Session Dashboard</h2>
+
+    <p>
+        <strong>Session ID:</strong>
+        <span id="sessionId"></span>
+    </p>
+
+    <p>
+        <strong>Status:</strong>
+        <span 
+		    id="monitorStatus"
+		    class="status-not-started">
+            NOT STARTED
+        </span>
+    </p>
+
+    <div id="eventSummary">
+
+        <div class="summary-card">
+            <span>LEFT</span>
+            <strong id="leftCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>RIGHT</span>
+            <strong id="rightCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>UP</span>
+            <strong id="upCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>DOWN</span>
+            <strong id="downCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>NO FACE</span>
+            <strong id="noFaceCount">0</strong>
+        </div>
+
+        <div class="summary-card">
+            <span>MULTIPLE FACES</span>
+            <strong id="multipleFaceCount">0</strong>
+        </div>
+
+    </div>
+
+    <p>
+        <strong>Total Flagged Events:</strong>
+        <span id="totalEvents">0</span>
+    </p>
+
+</div>
+
+    <video
+        id="camera"
+        autoplay
+        playsinline>
+    </video>
+
+    <br>
+
+    <button id="startCamera">
+        Start Camera
+    </button>
+
+    <button id="calibrate" disabled>
+            Calibrate
+    </button>
+
+    <button id="stopMonitoring" disabled>
+    Stop Monitoring
+    </button>
+
+    <p id="movement">
+            Movement: Not calibrated
+    </p>
+
+    <p id="status">
+        Loading MediaPipe...
+    </p>
+
+    <p id="faceCount">
+        Faces detected: 0
+    </p>
+
+    <hr>
+
+    <h2>Evidence</h2>
+
+    <div id="evidenceContainer"></div>
+
+<hr>
+
+<h2>Event Log</h2>
+
+<button id="exportLog">
+    Export Event Log (CSV)
+</button>
+
+<div id="eventLogContainer">
+
+    <table id="eventTable">
+
+        <thead>
+            <tr>
+                <th>Event ID</th>
+                <th>Type</th>
+                <th>Timestamp</th>
+                <th>Yaw</th>
+                <th>Pitch</th>
+            </tr>
+        </thead>
+
+        <tbody id="eventTableBody">
+        </tbody>
+
+    </table>
+
+</div>
+
+    <script type="module">
+
+		import {
+        		FaceLandmarker,
+        		FilesetResolver
+    		} from "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.mjs";
+
+        const video =
+            document.getElementById("camera");
+
+        const startButton =
+            document.getElementById("startCamera");
+
+        const status =
+            document.getElementById("status");
+
+        const faceCount =
+            document.getElementById("faceCount");
+
+	const calibrateButton =
+    	    document.getElementById("calibrate");
+
+	const movementDisplay =
+    	    document.getElementById("movement");
+
+	const stopButton =
+    	    document.getElementById("stopMonitoring");
+
+	let calibrationYaw = null;
+	let calibrationPitch = null;
+
+	let currentYaw = 0;
+	let currentPitch = 0;
+
+
+// --------------------------------------------------
+// MOVEMENT THRESHOLDS
+// --------------------------------------------------
+
+	const YAW_THRESHOLD = 15;
+	const PITCH_THRESHOLD = 15;
+
+// --------------------------------------------------
+// MOVEMENT STABILITY
+// --------------------------------------------------
+
+	const SMOOTHING_FRAMES = 7;
+	const CONFIRMATION_FRAMES = 8;
+
+	let yawHistory = [];
+	let pitchHistory = [];
+
+	let candidateMovement = "LOOKING STRAIGHT";
+	let confirmationCount = 0;
+
+	let confirmedMovement = "LOOKING STRAIGHT";
+
+	let monitoringActive = false;
+
+// --------------------------------------------------
+// FACE CONDITION CONFIRMATION
+// --------------------------------------------------
+
+	const FACE_CONFIRMATION_FRAMES = 8;
+
+	let noFaceFrames = 0;
+	let multipleFaceFrames = 0;
+
+	let noFaceConfirmed = false;
+	let multipleFaceConfirmed = false;
+
+// --------------------------------------------------
+// SESSION
+// --------------------------------------------------
+
+const sessionId =
+    "SESSION-" +
+    new Date()
+        .toISOString()
+        .replace(/[-:TZ.]/g, "")
+        .slice(0, 14);
+
+document.getElementById("sessionId").textContent = sessionId;
+
+
+let eventCounts = {
+
+    "LOOKING LEFT": 0,
+    "LOOKING RIGHT": 0,
+    "LOOKING UP": 0,
+    "LOOKING DOWN": 0,
+    "NO FACE": 0,
+    "MULTIPLE FACES": 0
+
+};
+
+// --------------------------------------------------
+// EVIDENCE
+// --------------------------------------------------
+
+	let eventCounter = 0;
+
+	let lastEvidenceTime = 0;
+
+	const COOLDOWN_SECONDS = 2;
+
+// --------------------------------------------------
+// EVENT LOG
+// --------------------------------------------------
+
+let eventLog = [];
+
+// --------------------------------------------------
+// EXTRACT HEAD ROTATION
+// --------------------------------------------------
+
+function getHeadRotation(matrix) {
+
+    const m = matrix.data;
+
+    /*
+     * MediaPipe provides a 4x4 facial transformation
+     * matrix. The upper-left 3x3 portion represents
+     * the face rotation.
+     */
+
+    const r00 = m[0];
+    const r10 = m[1];
+    const r20 = m[2];
+
+    const r21 = m[6];
+    const r22 = m[10];
+
+    const yaw =
+        Math.atan2(
+            -r20,
+            Math.sqrt(
+                r00 * r00 +
+                r10 * r10
+            )
+        ) * 180 / Math.PI;
+
+    const pitch =
+        Math.atan2(
+            r21,
+            r22
+        ) * 180 / Math.PI;
+
+    return {
+        yaw,
+        pitch
+    };
+}
+
+// --------------------------------------------------
+// SMOOTH MOVEMENT VALUES
+// --------------------------------------------------
+
+function getAverage(values) {
+
+    if (values.length === 0) {
+        return 0;
+    }
+
+    const total =
+        values.reduce(
+            (sum, value) => sum + value,
+            0
+        );
+
+    return total / values.length;
+}
+
+// --------------------------------------------------
+// UPDATE DASHBOARD
+// --------------------------------------------------
+
+function updateDashboard(eventType) {
+
+    if (
+        eventCounts[eventType] === undefined
+    ) {
+        return;
+    }
+
+    eventCounts[eventType]++;
+
+    document.getElementById("leftCount").textContent =
+        eventCounts["LOOKING LEFT"];
+
+    document.getElementById("rightCount").textContent =
+        eventCounts["LOOKING RIGHT"];
+
+    document.getElementById("upCount").textContent =
+        eventCounts["LOOKING UP"];
+
+    document.getElementById("downCount").textContent =
+        eventCounts["LOOKING DOWN"];
+
+    document.getElementById("noFaceCount").textContent =
+        eventCounts["NO FACE"];
+
+    document.getElementById("multipleFaceCount").textContent =
+        eventCounts["MULTIPLE FACES"];
+
+    document.getElementById("totalEvents").textContent =
+        Object.values(eventCounts)
+            .reduce(
+                (total, count) =>
+                    total + count,
+                0
+            );
+}
+
+// --------------------------------------------------
+// ADD EVENT TO LOG
+// --------------------------------------------------
+
+function addEventToLog(
+    eventId,
+    eventType,
+    timestamp,
+    yaw,
+    pitch
+) {
+
+    const event = {
+
+        eventId: eventId,
+
+        sessionId: sessionId,
+
+        eventType: eventType,
+
+        timestamp: timestamp,
+
+        yaw: yaw,
+
+        pitch: pitch
+
+    };
+
+    eventLog.push(event);
+
+
+    // Add row to table
+
+    const tableBody =
+        document.getElementById(
+            "eventTableBody"
+        );
+
+
+    const row =
+        document.createElement("tr");
+
+
+    row.innerHTML = `
+
+        <td>${eventId}</td>
+
+        <td>${eventType}</td>
+
+        <td>${timestamp}</td>
+
+        <td>
+            ${
+                yaw === null
+                    ? "—"
+                    : yaw.toFixed(2)
+            }
+        </td>
+
+        <td>
+            ${
+                pitch === null
+                    ? "—"
+                    : pitch.toFixed(2)
+            }
+        </td>
+
+    `;
+
+
+    tableBody.prepend(row);
+}
+
+// --------------------------------------------------
+// EXPORT EVENT LOG
+// --------------------------------------------------
+
+function exportEventLog() {
+
+    if (eventLog.length === 0) {
+
+        alert(
+            "No events have been recorded yet."
+        );
+
+        return;
+    }
+
+
+    const headers = [
+        "Session ID",
+        "Event ID",
+        "Timestamp",
+        "Event Type",
+        "Yaw",
+        "Pitch"
+    ];
+
+
+    const rows =
+        eventLog.map(event => [
+
+            event.sessionId,
+
+            event.eventId,
+
+            event.timestamp,
+
+            event.eventType,
+
+            event.yaw === null
+                ? ""
+                : event.yaw.toFixed(2),
+
+            event.pitch === null
+                ? ""
+                : event.pitch.toFixed(2)
+
+        ]);
+
+
+    const csv = [
+
+        headers,
+
+        ...rows
+
+    ]
+
+    .map(row =>
+        row.map(value =>
+            `"${String(value).replaceAll('"', '""')}"`
+        ).join(",")
+    )
+
+    .join("\n");
+
+
+    const blob =
+        new Blob(
+            [csv],
+            {
+                type:
+                    "text/csv;charset=utf-8;"
+            }
+        );
+
+
+    const url =
+        URL.createObjectURL(blob);
+
+
+    const link =
+        document.createElement("a");
+
+
+    link.href = url;
+
+
+    link.download =
+        `${sessionId}_events.csv`;
+
+
+    document.body.appendChild(link);
+
+
+    link.click();
+
+
+    document.body.removeChild(link);
+
+
+    URL.revokeObjectURL(url);
+}
+
+document.getElementById(
+    "exportLog"
+).addEventListener(
+    "click",
+    exportEventLog
+);
+
+// --------------------------------------------------
+// CAPTURE EVIDENCE
+// --------------------------------------------------
+
+function captureEvidence(eventType) {
+
+    const now = Date.now();
+
+    // Cooldown
+    if (
+        now - lastEvidenceTime <
+        COOLDOWN_SECONDS * 1000
+    ) {
+        return;
+    }
+
+    lastEvidenceTime = now;
+
+    updateDashboard(eventType);
+
+    eventCounter++;
+
+    const eventId =
+        "EVT-" +
+        String(eventCounter).padStart(5, "0");
+
+    const timestamp =
+        new Date().toLocaleString();
+
+// Current movement values
+
+let logYaw = null;
+let logPitch = null;
+
+if (
+    eventType !== "NO FACE" &&
+    eventType !== "MULTIPLE FACES"
+) {
+
+    logYaw = currentYaw;
+
+    logPitch = currentPitch;
+}
+
+    // Create canvas
+    const canvas =
+        document.createElement("canvas");
+
+    canvas.width =
+        video.videoWidth;
+
+    canvas.height =
+        video.videoHeight;
+
+    const context =
+        canvas.getContext("2d");
+
+    context.drawImage(
+        video,
+        0,
+        0,
+        canvas.width,
+        canvas.height
+    );
+
+    // Convert frame to image
+    const image =
+        canvas.toDataURL("image/jpeg", 0.9);
+
+    // Create evidence card
+    const card =
+        document.createElement("div");
+    
+    card.className = "evidence-card";
+
+    card.innerHTML = `
+
+    <div class="evidence-title">
+        ${eventId}
+    </div>
+
+    <div class="evidence-event">
+        ${eventType}
+    </div>
+
+    <div class="evidence-time">
+        ${timestamp}
+    </div>
+
+    <img
+        src="${image}"
+        alt="Evidence ${eventId}"
+    >
+
+    <a
+        class="evidence-download"
+        href="${image}"
+        download="${eventId}_${eventType.replaceAll(" ", "_")}.jpg"
+    >
+        Download Evidence
+    </a>
+
+`;
+
+    const container =
+        document.getElementById(
+            "evidenceContainer"
+        );
+
+    container.prepend(card);
+
+// Add event to event log
+addEventToLog(
+    eventId,
+    eventType,
+    timestamp,
+    logYaw,
+    logPitch
+);
+
+console.log(
+    "[EVIDENCE CAPTURED]",
+    eventId,
+    eventType
+);
+}
+
+
+// --------------------------------------------------
+// CALIBRATION
+// --------------------------------------------------
+
+calibrateButton.addEventListener(
+    "click",
+    () => {
+
+        if (
+            currentYaw === null ||
+            currentPitch === null
+        ) {
+            return;
+        }
+
+        calibrationYaw = currentYaw;
+
+        calibrationPitch = currentPitch;
+	
+	monitoringActive = true;
+
+	monitorStatus.textContent = "MONITORING";
+
+	monitorStatus.className = "status-monitoring";
+
+        movementDisplay.textContent = "Movement: CALIBRATION COMPLETE";
+
+        status.textContent = "Calibration complete. Look straight.";
+    }
+);
+
+
+        let faceLandmarker = null;
+
+        let lastVideoTime = -1;
+
+
+        // --------------------------------------------------
+        // INITIALIZE MEDIAPIPE
+        // --------------------------------------------------
+
+        async function initializeFaceLandmarker() {
+
+            try {
+
+                status.textContent =
+                    "Loading MediaPipe...";
+
+
+                const vision =
+                    await FilesetResolver.forVisionTasks(
+                        "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+                    );
+
+
+                faceLandmarker =
+                    await FaceLandmarker.createFromOptions(
+                        vision,
+                        {
+                            baseOptions: {
+                                modelAssetPath:
+                                    "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task"
+                            },
+
+                            runningMode: "VIDEO",
+
+                            numFaces: 2,
+
+			    outputFacialTransformationMatrixes: true,
+
+                            minFaceDetectionConfidence: 0.5,
+
+                            minFacePresenceConfidence: 0.5,
+
+                            minTrackingConfidence: 0.5
+                        }
+                    );
+
+
+                status.textContent =
+                    "MediaPipe loaded. Start the camera.";
+
+            }
+
+            catch (error) {
+
+                console.error(
+                    "MediaPipe initialization error:",
+                    error
+                );
+
+                status.textContent =
+                    "MediaPipe failed to load. Check Console.";
+
+            }
+
+        }
+
+
+        // --------------------------------------------------
+        // START CAMERA
+        // --------------------------------------------------
+
+        startButton.addEventListener(
+            "click",
+            async () => {
+
+                try {
+
+                    if (!faceLandmarker) {
+
+                        status.textContent =
+                            "MediaPipe is still loading.";
+
+                        return;
+
+                    }
+
+
+                    const stream =
+                        await navigator.mediaDevices.getUserMedia(
+                            {
+                                video: true,
+                                audio: false
+                            }
+                        );
+
+
+                    video.srcObject = stream;
+
+// --------------------------------------------------
+// RESET SESSION STATE
+// --------------------------------------------------
+
+		    monitoringActive = false;
+
+		    calibrationYaw = null;
+		    calibrationPitch = null;
+
+		    yawHistory = [];
+		    pitchHistory = [];
+
+		    candidateMovement = "LOOKING STRAIGHT";
+
+		    confirmationCount = 0;
+
+		    confirmedMovement = "LOOKING STRAIGHT";
+
+		    noFaceFrames = 0;
+		    multipleFaceFrames = 0;
+
+		    noFaceConfirmed = false;
+		    multipleFaceConfirmed = false;
+
+		    const monitorStatus = document.getElementById(
+       			 				"monitorStatus"
+    			);
+
+		    monitorStatus.textContent = "CAMERA ACTIVE";
+
+		    monitorStatus.className = "status-camera";
+
+		    calibrateButton.disabled = false;
+
+		    stopButton.disabled = false;
+
+		    startButton.disabled = true;
+
+                    status.textContent =
+                        "Camera started. Detecting faces...";
+
+
+                    video.addEventListener(
+                        "loadeddata",
+                        predictWebcam,
+                        {
+                            once: true
+                        }
+                    );
+
+                }
+
+                catch (error) {
+
+                    console.error(
+                        "Camera error:",
+                        error
+                    );
+
+                    status.textContent =
+                        "Camera access denied or unavailable.";
+
+                }
+
+            }
+        );
+
+
+// --------------------------------------------------
+// STOP MONITORING
+// --------------------------------------------------
+
+stopButton.addEventListener(
+    "click",
+    () => {
+
+        monitoringActive = false;
+
+
+        // Stop camera tracks
+
+        if (video.srcObject) {
+
+            video.srcObject
+                .getTracks()
+                .forEach(
+                    track => track.stop()
+                );
+
+            video.srcObject = null;
+        }
+
+
+        // Disable controls
+
+        calibrateButton.disabled = true;
+
+        stopButton.disabled = true;
+
+	startButton.disabled = false;
+
+
+        // Update status
+
+        monitorStatus.textContent = "STOPPED";
+
+	monitorStatus.className = "status-stopped";
+
+
+        status.textContent = "Monitoring stopped.";
+
+
+        faceCount.textContent = "Faces detected: 0";
+
+
+        movementDisplay.textContent = "Movement: Monitoring stopped.";
+    }
+);
+
+        // --------------------------------------------------
+        // FACE DETECTION
+        // --------------------------------------------------
+
+        async function predictWebcam() {
+
+            if (
+                video.readyState >= 2 &&
+                video.currentTime !== lastVideoTime &&
+		video.srcObject
+            ) {
+
+                lastVideoTime = video.currentTime;
+
+
+                const startTimeMs = performance.now();
+
+
+                const result =
+                    faceLandmarker.detectForVideo(
+                        video,
+                        startTimeMs
+                    );
+
+
+                const count = result.faceLandmarks.length;
+
+// --------------------------------------------------
+// NO FACE / MULTIPLE FACE DETECTION
+// --------------------------------------------------
+
+if (
+    count === 0 &&
+    monitoringActive
+) {
+    noFaceFrames++;
+
+    multipleFaceFrames = 0;
+    multipleFaceConfirmed = false;
+
+
+    if (
+        noFaceFrames >=
+        FACE_CONFIRMATION_FRAMES &&
+        !noFaceConfirmed
+    ) {
+
+        noFaceConfirmed = true;
+
+        captureEvidence("NO FACE");
+    }
+
+}
+
+else if (
+    count > 1 &&
+    monitoringActive
+) {
+    multipleFaceFrames++;
+
+    noFaceFrames = 0;
+    noFaceConfirmed = false;
+
+
+    if (
+        multipleFaceFrames >=
+        FACE_CONFIRMATION_FRAMES &&
+        !multipleFaceConfirmed
+    ) {
+
+        multipleFaceConfirmed = true;
+
+        captureEvidence(
+            "MULTIPLE FACES"
+        );
+    }
+
+}
+
+else {
+
+    // Exactly one face
+
+    noFaceFrames = 0;
+    multipleFaceFrames = 0;
+
+    noFaceConfirmed = false;
+    multipleFaceConfirmed = false;
+}
+
+		// --------------------------------------------------
+	        // HEAD MOVEMENT
+		// --------------------------------------------------
+
+		if (
+    		    count === 1 &&
+    		    result.facialTransformationMatrixes &&
+    		    result.facialTransformationMatrixes.length > 0
+		) {
+
+    		    const matrix = result.facialTransformationMatrixes[0];
+
+    		    const rotation = getHeadRotation(matrix);
+
+    		    currentYaw = rotation.yaw;
+
+    		    currentPitch = rotation.pitch;
+
+
+    		    if (
+        		calibrationYaw !== null &&
+        		calibrationPitch !== null
+    		    ) {
+
+        		const relativeYaw =
+            		    calibrationYaw-
+            		    currentYaw ;
+
+        		const relativePitch =
+            		    currentPitch -
+            		    calibrationPitch;
+
+
+ // --------------------------------------------------
+// ADD VALUES TO SMOOTHING HISTORY
+// --------------------------------------------------
+
+yawHistory.push(relativeYaw);
+pitchHistory.push(relativePitch);
+
+if (yawHistory.length > SMOOTHING_FRAMES) {
+    yawHistory.shift();
+}
+
+if (pitchHistory.length > SMOOTHING_FRAMES) {
+    pitchHistory.shift();
+}
+
+
+// --------------------------------------------------
+// CALCULATE SMOOTHED VALUES
+// --------------------------------------------------
+
+const smoothedYaw = getAverage(yawHistory);
+
+const smoothedPitch = getAverage(pitchHistory);
+
+
+// --------------------------------------------------
+// CLASSIFY MOVEMENT
+// --------------------------------------------------
+
+let movement = "LOOKING STRAIGHT";
+
+
+if (
+    smoothedYaw > YAW_THRESHOLD
+) {
+
+    movement = "LOOKING RIGHT";
+
+}
+
+else if (
+    smoothedYaw < -YAW_THRESHOLD
+) {
+
+    movement = "LOOKING LEFT";
+
+	}
+
+	else if (
+    	    smoothedPitch >PITCH_THRESHOLD
+	) {
+
+    	movement ="LOOKING DOWN";
+
+	}
+
+	else if (
+    	    smoothedPitch <-PITCH_THRESHOLD
+	) {
+
+    	movement ="LOOKING UP";
+	}
+
+
+// --------------------------------------------------
+// CONFIRM MOVEMENT
+// --------------------------------------------------
+
+	if (
+    	    movement === candidateMovement &&
+    	    movement !== "LOOKING STRAIGHT"
+	) {
+
+    	    confirmationCount++;
+
+	}
+
+	else {
+
+    	    candidateMovement = movement;
+
+    	    confirmationCount = 0;
+
+	}
+
+	if (movement === "LOOKING STRAIGHT") {
+
+    	    confirmationCount = 0;
+
+	    candidateMovement ="LOOKING STRAIGHT";
+
+    	    confirmedMovement ="LOOKING STRAIGHT";
+	}
+
+
+// --------------------------------------------------
+// MOVEMENT CONFIRMED
+// --------------------------------------------------
+
+if (
+    confirmationCount >= CONFIRMATION_FRAMES
+) {
+
+    const previousMovement = confirmedMovement;
+
+    confirmedMovement = candidateMovement;
+
+    if (
+        confirmedMovement !== previousMovement
+    ) {
+
+        captureEvidence(
+            confirmedMovement
+        );
+    }
+}
+
+
+	if (
+    	    confirmedMovement !=="LOOKING STRAIGHT"
+	) {
+
+    	    movementDisplay.textContent ="Movement: " +confirmedMovement;
+
+	}
+
+	else {
+
+    	    movementDisplay.textContent ="Movement: " +
+        movement;
+
+	}
+    		}
+	}
+
+
+                faceCount.textContent =
+                    "Faces detected: " + count;
+
+
+                if (count === 0) {
+
+                    status.textContent =
+                        "No face detected.";
+
+                }
+
+                else if (count === 1) {
+
+                    status.textContent =
+                        "Face detected.";
+
+                }
+
+                else {
+
+                    status.textContent =
+                        "Multiple faces detected.";
+
+                }
+
+            }
+
+
+            window.requestAnimationFrame(
+                predictWebcam
+            );
+
+        }
+
+        // --------------------------------------------------
+        // START MEDIAPIPE
+        // --------------------------------------------------
+
+        initializeFaceLandmarker();
+
+    </script>
+
+</body>
+
+</html>
